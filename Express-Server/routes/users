@@ -1,4 +1,33 @@
 const router = require('express').Router()
+const dotenv = require('dotenv')
 
+dotenv.config()
+const stripe = require('stripe')(process.env.SECRET_KEY);
+console.log('stripe :>> ', stripe);
+
+
+router.post('/create-subscription', async (req, res) => {
+     try {
+          // Create a customer
+          const customer = await stripe.customers.create({
+               email: req.body.email,
+               cardToken: req.cardToken,
+          });
+          console.log('customer :>> ', customer);
+          // Create a subscription
+          const subscription = await stripe.subscriptions.create({
+               customer: customer.id,
+               items: [
+                    {
+                         price: req.body.price_id,
+                    },
+               ],
+          });
+
+
+     } catch (err) {
+          console.log("err-create-subscription------>", err);
+     }
+})
 
 module.exports = router
